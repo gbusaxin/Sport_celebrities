@@ -3,7 +3,9 @@ package com.example.sportcelebrities.domain.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.sportcelebrities.utils.Constants.CELEBRITY_DB_TABLE
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = CELEBRITY_DB_TABLE)
 data class Celebrity(
     @PrimaryKey(autoGenerate = false)
@@ -15,7 +17,6 @@ data class Celebrity(
     val power: Int,
     val month: String,
     val day: String,
-    val family: List<String>,
-    val abilities: List<String>,
-    val natureTypes: List<String>
+    val teams: List<String>,
+    val prizes: List<String>,
 )

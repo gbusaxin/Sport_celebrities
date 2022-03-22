@@ -17,15 +17,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.sportcelebrities.R
 import com.example.sportcelebrities.domain.model.OnBoardingPage
+import com.example.sportcelebrities.navigation.Screen
 import com.example.sportcelebrities.ui.theme.*
 import com.google.accompanist.pager.*
 
 @ExperimentalPagerApi
 @Composable
-fun WelcomeScreen(navController: NavHostController) {
+fun WelcomeScreen(
+    navController: NavHostController,
+    viewModel: WelcomeViewModel = hiltViewModel()
+) {
 
     val pages = listOf(
         OnBoardingPage.StartPage,
@@ -57,9 +62,13 @@ fun WelcomeScreen(navController: NavHostController) {
             indicatorWidth = PAGGING_INDICATOR_WIDTH,
             spacing = PAGGING_INDICATOR_SPACING
         )
-        ReadyButton(pagerState = pagerState,
-        modifier = Modifier.weight(1f)) {
-            
+        ReadyButton(
+            pagerState = pagerState,
+            modifier = Modifier.weight(1f)
+        ) {
+            navController.popBackStack()
+            navController.navigate(Screen.Home.route)
+            viewModel.saveOnBoardingState(completed = true)
         }
     }
 
@@ -104,7 +113,7 @@ fun PagerScreen(onBoardingPage: OnBoardingPage) {
 @Composable
 fun ReadyButton(
     pagerState: PagerState,
-    modifier:Modifier,
+    modifier: Modifier,
     onClick: () -> Unit
 ) {
     Row(

@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.sportcelebrities.data.repository.DataStoreOperationsImpl
 import com.example.sportcelebrities.data.repository.Repository
 import com.example.sportcelebrities.domain.repository.DataStoreOperations
+import com.example.sportcelebrities.domain.use_cases.GetAllCelebritiesUseCase
 import com.example.sportcelebrities.domain.use_cases.ReadOnBoardingUseCase
 import com.example.sportcelebrities.domain.use_cases.SaveOnBoardingUseCase
 import com.example.sportcelebrities.domain.use_cases.UseCases
@@ -31,7 +32,8 @@ object RepositoryModule {
     fun provideUseCases(repository: Repository): UseCases {
         return UseCases(
             saveOnBoardingUseCase = SaveOnBoardingUseCase(repository = repository),
-            readOnBoardingUseCase = ReadOnBoardingUseCase(repository = repository)
+            readOnBoardingUseCase = ReadOnBoardingUseCase(repository = repository),
+            getAllCelebritiesUseCase = GetAllCelebritiesUseCase(repository = repository)
         )
     }
 

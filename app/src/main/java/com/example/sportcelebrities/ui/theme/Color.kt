@@ -36,3 +36,11 @@ val Colors.colorInactiveIndicator
 val Colors.colorBackgroundButton
     @Composable
     get() = if (isLight) LightOrange else DarkOrange
+
+val Colors.colorTopAppBarContent
+    @Composable
+    get() = if (isLight) Color.White else Color.LightGray
+
+val Colors.colorTopAppBarBackground
+    @Composable
+    get() = if (isLight) LightOrange else DarkOrange
