@@ -4,10 +4,7 @@ import android.content.Context
 import com.example.sportcelebrities.data.repository.DataStoreOperationsImpl
 import com.example.sportcelebrities.data.repository.Repository
 import com.example.sportcelebrities.domain.repository.DataStoreOperations
-import com.example.sportcelebrities.domain.use_cases.GetAllCelebritiesUseCase
-import com.example.sportcelebrities.domain.use_cases.ReadOnBoardingUseCase
-import com.example.sportcelebrities.domain.use_cases.SaveOnBoardingUseCase
-import com.example.sportcelebrities.domain.use_cases.UseCases
+import com.example.sportcelebrities.domain.use_cases.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,7 +30,8 @@ object RepositoryModule {
         return UseCases(
             saveOnBoardingUseCase = SaveOnBoardingUseCase(repository = repository),
             readOnBoardingUseCase = ReadOnBoardingUseCase(repository = repository),
-            getAllCelebritiesUseCase = GetAllCelebritiesUseCase(repository = repository)
+            getAllCelebritiesUseCase = GetAllCelebritiesUseCase(repository = repository),
+            searchCelebrityUseCase = SearchCelebrityUseCase(repository = repository)
         )
     }
 

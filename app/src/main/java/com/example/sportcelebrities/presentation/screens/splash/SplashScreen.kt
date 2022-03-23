@@ -1,6 +1,6 @@
 package com.example.sportcelebrities.presentation.screens.splash
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.sportcelebrities.R
 import com.example.sportcelebrities.navigation.Screen
+import com.example.sportcelebrities.presentation.components.ShimmerItem
 import com.example.sportcelebrities.ui.theme.Purple500
 import com.example.sportcelebrities.ui.theme.Purple700
 
@@ -31,7 +32,7 @@ fun SplashScreen(
 
     val onBoardingCompleted by viewModel.onBoardingCompleted.collectAsState()
 
-    val rotate = remember { androidx.compose.animation.core.Animatable(0f) }
+    val rotate = remember { Animatable(0f) }
 
     LaunchedEffect(key1 = true) {
         rotate.animateTo(
@@ -50,6 +51,7 @@ fun SplashScreen(
     }
 
     Splash(rotate = rotate.value)
+
 }
 
 @Composable

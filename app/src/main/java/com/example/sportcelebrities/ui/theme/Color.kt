@@ -13,6 +13,10 @@ val LightOrange = Color(0xffffa04d)
 val DarkGrey = Color(0xFF696969)
 val LightGrey = Color(0xFFD3D3D3)
 
+val ShimmerLightGrey = Color(0xFFF1F1F1)
+val ShimmerMediumGrey = Color(0xFFE3E3E3)
+val ShimmerDarkGrey = Color(0xFF1D1D1D)
+
 val Colors.welcomeScreenBackgroundColor
     @Composable
     get() = if (isLight) Purple200 else Color.Black

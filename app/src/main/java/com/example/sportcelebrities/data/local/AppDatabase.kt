@@ -11,7 +11,7 @@ import com.example.sportcelebrities.domain.model.CelebrityRemoteKey
 @Database(entities = [
     Celebrity::class,
     CelebrityRemoteKey::class
-                     ], version = 1, exportSchema = false)
+                     ], version = 2, exportSchema = false)
 @TypeConverters(DatabaseConverter::class)
 abstract class AppDatabase: RoomDatabase() {
 

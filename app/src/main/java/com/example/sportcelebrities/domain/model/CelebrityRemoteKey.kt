@@ -9,6 +9,6 @@ data class CelebrityRemoteKey(
     @PrimaryKey(autoGenerate = false)
     val id:Int,
     val prevKey:Int?,
-    val nextKey:Int?
-
+    val nextKey:Int?,
+    val lastUpdate:Long?
 )

@@ -1,5 +1,6 @@
 package com.example.sportcelebrities.presentation.common
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import coil.annotation.ExperimentalCoilApi
@@ -28,6 +30,7 @@ import com.example.sportcelebrities.R
 import com.example.sportcelebrities.domain.model.Celebrity
 import com.example.sportcelebrities.navigation.Screen
 import com.example.sportcelebrities.presentation.components.RatingWidget
+import com.example.sportcelebrities.presentation.components.ShimmerEffect
 import com.example.sportcelebrities.ui.theme.*
 
 @ExperimentalCoilApi
@@ -36,22 +39,64 @@ fun ListContent(
     celebrities: LazyPagingItems<Celebrity>,
     navController: NavHostController
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(all = SMALL_PADDING),
-        verticalArrangement = Arrangement.spacedBy(SMALL_PADDING)
-    ){
-        items(
-            items = celebrities,
-            key = { celebrity ->
-                celebrity.id
-            }
-        ){
-            it?.let {
-                CelebrityItem(celebrity = it, navController = navController)
+    val result = handlePagingResult(celebrities = celebrities)
+    if (result) {
+        LazyColumn(
+            contentPadding = PaddingValues(all = SMALL_PADDING),
+            verticalArrangement = Arrangement.spacedBy(SMALL_PADDING)
+        ) {
+            items(
+                items = celebrities,
+                key = { celebrity ->
+                    celebrity.id
+                }
+            ) {
+                it?.let {
+                    Log.d("CHECK_RESULT_HANDLING", "$result inside ${it.name}")
+                    CelebrityItem(celebrity = it, navController = navController)
+                }
             }
         }
     }
+    Log.d("CHECK_RESULT_HANDLING", "$result end")
+}
 
+@Composable
+fun handlePagingResult(
+    celebrities: LazyPagingItems<Celebrity>
+): Boolean {
+    celebrities.apply {
+        val error = when {
+            loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+            loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+            loadState.append is LoadState.Error -> loadState.append as LoadState.Error
+            else -> null
+        }
+        Log.d("CHECK_ERROR_HANDLE", error.toString())
+        return when {
+            loadState.refresh is LoadState.Loading -> {
+                ShimmerEffect()
+                Log.d("CHECK_ERROR_refresh", error.toString())
+                false
+            }
+            error != null -> {
+                EmptyScreen(
+                    error = error,
+                    celebrities = celebrities
+                )
+                Log.d("CHECK_ERROR_null", error.toString())
+                false
+            }
+            celebrities.itemCount < 1 -> {
+                EmptyScreen()
+                false
+            }
+            else -> {
+                Log.d("CHECK_ERROR_else", error.toString())
+                true
+            }
+        }
+    }
 }
 
 @ExperimentalCoilApi
@@ -122,7 +167,7 @@ fun CelebrityItem(
                 ) {
                     RatingWidget(
                         modifier = Modifier.padding(end = SMALL_PADDING),
-                        rating =celebrity.rating
+                        rating = celebrity.rating
                     )
                     Text(
                         text = "(${celebrity.rating})",

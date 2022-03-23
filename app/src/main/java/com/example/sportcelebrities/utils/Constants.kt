@@ -9,8 +9,10 @@ object Constants {
     const val PREFERENCES_NAME = "celebrity.pref"
     const val PREFERENCES_KEY = "celebrity_key"
     const val BASE_URL = "http://95.217.132.144"
-    const val STARTING_PAGE_INDEX = 1
     const val PAGE_SIZE_DATABASE = 5
+
+    const val STAR_PAGE_INDEX = 1
+    const val LAST_PAGE_INDEX = 3 //unfortunately I can't realize paging on backend server
 
     const val FILLED_STARS_KEY = "FilledStars"
     const val EMPTY_STARS_KEY = "EmptyStarts"
