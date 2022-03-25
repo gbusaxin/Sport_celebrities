@@ -1,6 +1,7 @@
 package com.example.sportcelebrities.domain.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.Keep
 import com.example.sportcelebrities.R
 
 sealed class OnBoardingPage(

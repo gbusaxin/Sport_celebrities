@@ -1,22 +1,24 @@
 package com.example.sportcelebrities.presentation.screens.web_view
 
-import android.app.Activity
 import android.content.Context
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.sportcelebrities.MainActivity
-import com.example.sportcelebrities.utils.web_utils.CustomWebClient
 import com.example.sportcelebrities.utils.Constants.DEFAULT_URL_LINK
+import com.example.sportcelebrities.utils.web_utils.CustomChromeClient
+import com.example.sportcelebrities.utils.web_utils.CustomWebClient
 
 @Composable
 fun WebViewScreen(
@@ -80,9 +82,9 @@ fun rememberWebViewClient(context: Context): WebViewClient {
 
 @Composable
 fun rememberWebChromeClient(context: Context): WebChromeClient {
-     // I am the dangerous
+    val activity = LocalContext.current as ComponentActivity
     val chromeClient = remember {
-
+        CustomChromeClient(activity)
     }
     return chromeClient
 }

@@ -1,8 +1,10 @@
 package com.example.sportcelebrities.domain.model
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.sportcelebrities.utils.Constants.CELEBRITY_DB_REMOTE_KEY
+
 
 @Entity(tableName = CELEBRITY_DB_REMOTE_KEY)
 data class CelebrityRemoteKey(
