@@ -31,7 +31,10 @@ object RepositoryModule {
             saveOnBoardingUseCase = SaveOnBoardingUseCase(repository = repository),
             readOnBoardingUseCase = ReadOnBoardingUseCase(repository = repository),
             getAllCelebritiesUseCase = GetAllCelebritiesUseCase(repository = repository),
-            searchCelebrityUseCase = SearchCelebrityUseCase(repository = repository)
+            searchCelebrityUseCase = SearchCelebrityUseCase(repository = repository),
+            getSelectedCelebrityUseCase = GetSelectedCelebrityUseCase(repository = repository),
+            sendLocaleUseCase = SendLocaleUseCase(repository = repository),
+            setWebSettingsUseCase = SetWebSettingsUseCase(repository = repository)
         )
     }
 

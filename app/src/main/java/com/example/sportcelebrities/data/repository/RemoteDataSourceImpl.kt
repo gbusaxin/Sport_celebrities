@@ -19,7 +19,7 @@ class RemoteDataSourceImpl(
     private val database: AppDatabase
 ) : RemoteDataSource {
 
-    val celebrityDao = database.getCelebrityDao()
+    private val celebrityDao = database.getCelebrityDao()
 
     override fun getAllData(): Flow<PagingData<Celebrity>> {
         val pagingSourceFactory = { celebrityDao.getAllCelebrities() }

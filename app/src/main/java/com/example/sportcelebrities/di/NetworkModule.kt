@@ -4,7 +4,9 @@ import androidx.paging.ExperimentalPagingApi
 import com.example.sportcelebrities.data.local.AppDatabase
 import com.example.sportcelebrities.data.remote.ApiService
 import com.example.sportcelebrities.data.repository.RemoteDataSourceImpl
+import com.example.sportcelebrities.data.repository.WebViewOperationsImpl
 import com.example.sportcelebrities.domain.repository.RemoteDataSource
+import com.example.sportcelebrities.domain.repository.WebViewOperations
 import com.example.sportcelebrities.utils.Constants.BASE_URL
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -51,8 +53,7 @@ object NetworkModule {
     @Singleton
     fun provideApiService(
         retrofit: Retrofit
-    )
-            : ApiService {
+    ): ApiService {
         return retrofit.create(ApiService::class.java)
     }
 
@@ -61,8 +62,15 @@ object NetworkModule {
     fun provideRemoteDataSource(
         apiService: ApiService,
         appDatabase: AppDatabase
-    ):RemoteDataSource{
+    ): RemoteDataSource {
         return RemoteDataSourceImpl(apiService = apiService, database = appDatabase)
     }
 
+    @Provides
+    @Singleton
+    fun provideWebViewOperations(
+        apiService: ApiService
+    ): WebViewOperations {
+        return WebViewOperationsImpl(apiService = apiService)
+    }
 }

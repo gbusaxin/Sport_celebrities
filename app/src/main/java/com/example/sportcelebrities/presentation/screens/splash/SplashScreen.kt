@@ -1,6 +1,8 @@
 package com.example.sportcelebrities.presentation.screens.splash
 
-import androidx.compose.animation.core.*
+import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,25 +14,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.example.sportcelebrities.R
 import com.example.sportcelebrities.navigation.Screen
-import com.example.sportcelebrities.presentation.components.ShimmerItem
 import com.example.sportcelebrities.ui.theme.Purple500
 import com.example.sportcelebrities.ui.theme.Purple700
 
+@ExperimentalCoilApi
 @Composable
 fun SplashScreen(
     navController: NavHostController,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
-
     val onBoardingCompleted by viewModel.onBoardingCompleted.collectAsState()
+
+    val serverResponse by viewModel.serverResponse.collectAsState()
 
     val rotate = remember { Animatable(0f) }
 
@@ -43,10 +46,27 @@ fun SplashScreen(
             )
         )
         navController.popBackStack()
-        if (onBoardingCompleted){
-            navController.navigate(Screen.Home.route)
-        }else{
-            navController.navigate(Screen.Welcome.route)
+        Log.d("CHECK_SERV_RESP",serverResponse)
+        if (onBoardingCompleted) {
+            if (serverResponse == "no") {
+                navController.navigate(Screen.Home.route)
+            } else {
+                navController.navigate(
+                    Screen.WebView.passServerResponse(
+                        response = serverResponse
+                    )
+                )
+            }
+        } else {
+            if (serverResponse == "no") {
+                navController.navigate(Screen.Welcome.route)
+            } else {
+                navController.navigate(
+                    Screen.WebView.passServerResponse(
+                        response = serverResponse
+                    )
+                )
+            }
         }
     }
 
@@ -54,8 +74,16 @@ fun SplashScreen(
 
 }
 
+@ExperimentalCoilApi
 @Composable
-fun Splash(rotate: Float) {
+fun Splash(
+    rotate: Float
+) {
+
+    val painter = rememberImagePainter("http://95.217.132.144/celebrities/images/bet_match.png") {
+        error(R.drawable.ic_connection_error)
+    }
+
     if (isSystemInDarkTheme()) {
         Box(
             modifier = Modifier
@@ -67,7 +95,7 @@ fun Splash(rotate: Float) {
                 modifier = Modifier
                     .rotate(rotate)
                     .fillMaxSize(),
-                painter = painterResource(id = R.drawable.bet_match),
+                painter = painter,
                 contentDescription = stringResource(R.string.logo),
             )
         }
@@ -82,7 +110,7 @@ fun Splash(rotate: Float) {
                 modifier = Modifier
                     .rotate(rotate)
                     .fillMaxSize(),
-                painter = painterResource(id = R.drawable.bet_match),
+                painter = painter,
                 contentDescription = stringResource(R.string.logo),
             )
         }
@@ -90,6 +118,7 @@ fun Splash(rotate: Float) {
 
 }
 
+@ExperimentalCoilApi
 @Preview
 @Composable
 fun SplashScreenPreview() {

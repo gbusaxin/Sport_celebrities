@@ -3,6 +3,9 @@ package com.example.sportcelebrities.di
 import android.content.Context
 import androidx.room.Room
 import com.example.sportcelebrities.data.local.AppDatabase
+import com.example.sportcelebrities.data.local.AppDatabase_Impl
+import com.example.sportcelebrities.data.repository.LocalDataSourceImpl
+import com.example.sportcelebrities.domain.repository.LocalDataSource
 import com.example.sportcelebrities.utils.Constants.DATABASE_NAME
 import dagger.Module
 import dagger.Provides
@@ -26,6 +29,14 @@ object DatabaseModule {
             DATABASE_NAME
         ).fallbackToDestructiveMigration()
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideLocalDataSource(
+        appDatabase: AppDatabase
+    ):LocalDataSource{
+        return LocalDataSourceImpl(appDatabase = appDatabase)
     }
 
 }

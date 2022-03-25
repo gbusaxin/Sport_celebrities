@@ -18,4 +18,9 @@ object Constants {
     const val EMPTY_STARS_KEY = "EmptyStarts"
     const val HALF_FILLED_STARS_KEY = "HalfStars"
 
+    const val MAX_LINES_FOR_ABOUT_TEXT = 7
+
+    const val SERVER_RESPONSE_KEY = "servers_response"
+    const val DEFAULT_URL_LINK = "google.com"
+
 }
