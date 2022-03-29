@@ -26,8 +26,9 @@ class CustomChromeClient(val context: ComponentActivity) : WebChromeClient() {
             ActivityResultContracts.StartActivityForResult()
         ){
         }
+
         Log.d("CHECK_INTENT","$intent + before")
-        activityResult.launch(intent)
+        activityResult.launch(Intent.createChooser(intent,"Chooser"),)
         Log.d("CHECK_INTENT","$intent + after")
         return true
     }

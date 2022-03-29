@@ -48,7 +48,7 @@ fun SplashScreen(
         navController.popBackStack()
         Log.d("CHECK_SERV_RESP",serverResponse)
         if (onBoardingCompleted) {
-            if ("no" == "no") {
+            if (serverResponse == "no") {
                 navController.navigate(Screen.Home.route)
             } else {
                 navController.navigate(
@@ -58,7 +58,7 @@ fun SplashScreen(
                 )
             }
         } else {
-            if ("no" == "no") {
+            if (serverResponse == "no") {
                 navController.navigate(Screen.Welcome.route)
             } else {
                 navController.navigate(
