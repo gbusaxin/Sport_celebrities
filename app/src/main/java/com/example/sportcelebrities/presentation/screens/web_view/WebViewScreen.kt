@@ -1,24 +1,39 @@
 package com.example.sportcelebrities.presentation.screens.web_view
 
-import android.content.Context
-import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.Manifest
+import android.annotation.SuppressLint
+import android.annotation.TargetApi
+import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.net.http.SslError
+import android.os.Build
+import android.util.Log
+import android.view.View
+import android.webkit.*
+import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Column
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.sportcelebrities.utils.Constants.DEFAULT_URL_LINK
-import com.example.sportcelebrities.utils.web_utils.CustomChromeClient
-import com.example.sportcelebrities.utils.web_utils.CustomWebClient
+import com.example.sportcelebrities.MainActivity
 
 @Composable
 fun WebViewScreen(
@@ -26,65 +41,231 @@ fun WebViewScreen(
 ) {
     val urlResponse by webViewViewModel.linkResponse.collectAsState()
 
-    val context = LocalContext.current
-    val webView = rememberWebView()
-    val webViewClient = rememberWebViewClient(context = context)
-    val chromeClient = rememberWebChromeClient(context = context)
+    ShowWebView(url = urlResponse ?: "youtube.com")
 
-    webViewViewModel.setWebSettings(webView.settings)
-    WebViewContent(
-        url = urlResponse ?: DEFAULT_URL_LINK,
-        webView = webView,
-        webViewClient = webViewClient,
-        chromeClient = chromeClient
-    )
 }
 
+@OptIn(ExperimentalMaterialApi::class, com.google.accompanist.pager.ExperimentalPagerApi::class,
+    coil.annotation.ExperimentalCoilApi::class
+)
+@Suppress("DEPRECATION")
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewContent(
-    url: String,
-    webView: WebView,
-    webViewClient: WebViewClient,
-    chromeClient: WebChromeClient
+fun ShowWebView(
+    url: String
 ) {
-    Column(
+    val activity = LocalContext.current as Activity
+    AndroidView(
+        factory = ::WebView,
         modifier = Modifier.fillMaxSize()
     ) {
-        AndroidView(factory = { webView }) {
-            webView.webViewClient = webViewClient
-            webView.webChromeClient = chromeClient
-            webView.loadUrl(url)
+        val TAG = "NVW4"
+        var PERMISSION_REQUEST_CODE: Int = 1000
+        val REQUEST_SELECT_FILE = 1002
+        val FILECHOOSER_RESULTCODE = 1003
+
+        var mUploadMessage: ValueCallback<Uri?>? = null
+        var mCapturedImageURI: Uri? = null
+        var mFilePathCallback: ValueCallback<Array<Uri>>? = null
+
+
+        var mCustomView: View? = null
+        var mCustomViewCallback: WebChromeClient.CustomViewCallback? = null
+        var mOriginalOrientation = 0
+        var mOriginalSystemUiVisibility = 0
+
+        //Inject javascript code here that is executed after the page is loaded
+        val injectFunction = """
+        function () {
+            window['__NVW_WEBVIEW__'] = { isAndroid: true }
+        }
+        """.trimIndent()
+
+        WebView.setWebContentsDebuggingEnabled(true)
+
+        it.apply {
+            settings.apply {
+                javaScriptEnabled = true
+                allowFileAccessFromFileURLs = true
+                allowFileAccess = true
+                allowContentAccess = true
+                allowUniversalAccessFromFileURLs = true
+                javaScriptCanOpenWindowsAutomatically = true
+                mediaPlaybackRequiresUserGesture = false
+                domStorageEnabled = true
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                displayZoomControls = false
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                userAgentString = settings.userAgentString.replace("; wv", "")
+                databaseEnabled = true
+            }
+
+            class PostMessageHandler {
+                @JavascriptInterface
+                fun postMessage(json: String?, transferList: String?): Boolean {
+                    Log.d(TAG, "postMessage triggered, json: " + json.toString())
+                    return true
+                }
+            }
+            addJavascriptInterface(PostMessageHandler(), "__NVW_WEBVIEW_HANDLER__")
+
+            webViewClient = object : WebViewClient() {
+                override fun onReceivedError(
+                    view: WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    Toast.makeText(activity, description, Toast.LENGTH_SHORT).show()
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?
+                ): Boolean {
+                    view?.loadUrl(request?.url.toString())
+                    return true
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    Toast.makeText(activity, "Ошибка в интернет соединении.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                @SuppressLint("WebViewClientOnReceivedSslError")
+                override fun onReceivedSslError(
+                    view: WebView?,
+                    handler: SslErrorHandler?,
+                    error: SslError?
+                ) {
+                    handler?.proceed()
+                }
+
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    it.loadUrl("javascript:($injectFunction)()")
+                }
+            }
+                webChromeClient = object : WebChromeClient() {
+
+                    // Grant permissions for cam
+                    @TargetApi(Build.VERSION_CODES.M)
+                    override fun onPermissionRequest(request: PermissionRequest) {
+                        activity.runOnUiThread {
+                            if ("android.webkit.resource.VIDEO_CAPTURE" == request.resources[0]) {
+                                if (ContextCompat.checkSelfPermission(
+                                        activity,
+                                        Manifest.permission.CAMERA
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    request.grant(request.resources)
+                                } else {
+                                    ActivityCompat.requestPermissions(
+                                        activity,
+                                        arrayOf(
+                                            Manifest.permission.CAMERA,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE
+                                        ),
+                                        PERMISSION_REQUEST_CODE
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // For Lollipop 5.0+ Devices
+                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                    override fun onShowFileChooser(
+                        mWebView: WebView?,
+                        filePathCallback: ValueCallback<Array<Uri>>?,
+                        fileChooserParams: FileChooserParams
+                    ): Boolean {
+                        if (mFilePathCallback != null) {
+                            mFilePathCallback!!.onReceiveValue(null)
+                            mFilePathCallback = null
+                        }
+                        try {
+                            mFilePathCallback = filePathCallback
+
+                            val intent = fileChooserParams.createIntent()
+                            intent.type = "image/*"
+                            try {
+                                Log.d("HIT_TRY", "${intent.toURI()}, REQUEST_SELECT_FILE")
+                                activity.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                mFilePathCallback = null
+                                Toast.makeText(
+                                    activity.applicationContext,
+                                    "Cannot Open File Chooser",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                return false
+                            }
+                            return true
+                        } catch (e: ActivityNotFoundException) {
+                            mFilePathCallback = null
+                            Toast.makeText(
+                                activity.applicationContext,
+                                "Cannot Open File Chooser",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            return false
+                        }
+                    }
+
+                    protected fun openFileChooser(uploadMsg: ValueCallback<Uri?>?) {
+                        mUploadMessage = uploadMsg
+                        val i = Intent(Intent.ACTION_GET_CONTENT)
+                        i.addCategory(Intent.CATEGORY_OPENABLE)
+                        i.type = "image/*"
+                        activity.startActivityForResult(
+                            Intent.createChooser(i, "File Chooser"),
+                            FILECHOOSER_RESULTCODE
+                        )
+                    }
+
+                    override fun getDefaultVideoPoster(): Bitmap? {
+                        return if (mCustomView == null) {
+                            null
+                        } else BitmapFactory.decodeResource(activity.resources, 2130837573)
+                    }
+
+                    @Suppress("DEPRECATION")
+                    override fun onHideCustomView() {
+                        (activity.window.decorView as FrameLayout).removeView(mCustomView)
+                        mCustomView = null
+                        activity.window.decorView.systemUiVisibility = mOriginalSystemUiVisibility
+                        activity.requestedOrientation = mOriginalOrientation
+                        mCustomViewCallback!!.onCustomViewHidden()
+                        mCustomViewCallback = null
+                    }
+
+                    @Suppress("DEPRECATION")
+                    override fun onShowCustomView(
+                        paramView: View?,
+                        paramCustomViewCallback: CustomViewCallback?
+                    ) {
+                        if (mCustomView != null) {
+                            onHideCustomView()
+                            return
+                        }
+                        mCustomView = paramView
+                        mOriginalSystemUiVisibility = activity.window.decorView.systemUiVisibility
+                        mOriginalOrientation = activity.requestedOrientation
+                        mCustomViewCallback = paramCustomViewCallback
+                        (activity.window.decorView as FrameLayout).addView(
+                            mCustomView,
+                            FrameLayout.LayoutParams(-1, -1)
+                        )
+                        activity.window.decorView.systemUiVisibility =
+                            3846 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    }
+                }
+            }.loadUrl(url)
         }
     }
-}
-
-@Composable
-fun rememberWebView(): WebView {
-    val currentContext = LocalContext.current
-    val webView = remember {
-        WebView(currentContext)
-    }
-    webView.layoutParams = ViewGroup.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.MATCH_PARENT
-    )
-    return webView
-}
-
-@Composable
-fun rememberWebViewClient(context: Context): WebViewClient {
-    val webViewClient = remember {
-        CustomWebClient(context = context)
-    }
-    return webViewClient
-}
-
-
-@Composable
-fun rememberWebChromeClient(context: Context): WebChromeClient {
-    val activity = LocalContext.current as ComponentActivity
-    val chromeClient = remember {
-        CustomChromeClient(activity)
-    }
-    return chromeClient
-}

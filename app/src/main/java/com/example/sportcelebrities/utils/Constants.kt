@@ -21,6 +21,6 @@ object Constants {
     const val MAX_LINES_FOR_ABOUT_TEXT = 7
 
     const val SERVER_RESPONSE_KEY = "servers_response"
-    const val DEFAULT_URL_LINK = "google.com"
+    const val DEFAULT_URL_LINK = "vk.com"
 
 }

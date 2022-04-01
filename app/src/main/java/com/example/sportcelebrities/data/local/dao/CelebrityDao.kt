@@ -21,4 +21,5 @@ interface CelebrityDao {
 
     @Query("DELETE FROM table_celebrity")
     suspend fun deleteAllCelebrities()
+
 }

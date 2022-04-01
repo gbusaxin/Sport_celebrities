@@ -42,7 +42,6 @@ object NetworkModule {
     fun provideRetrofitInstance(
         okHttpClient: OkHttpClient
     ): Retrofit {
-        val mediaType = MediaType.get("application/json")
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
