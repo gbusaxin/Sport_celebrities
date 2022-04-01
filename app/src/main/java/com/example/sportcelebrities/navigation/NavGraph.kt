@@ -42,7 +42,7 @@ fun SetupNavGraph(navController: NavHostController) {
                 type = NavType.StringType
             })
         ){
-            WebViewScreen()
+            WebViewScreen(navController = navController)
         }
 
         composable(
